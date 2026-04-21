@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useMyCookSessions } from '@/hooks/useCookSessions';
+import { useSavedRecipes } from '@/hooks/useSaved';
+
 import styles from './ProfilePage.module.scss';
-import {useMyCookSessions} from "@/hooks/useCookSessions.ts";
-import {useSavedRecipes} from "@/hooks/useSaved.ts";
+import {useMyRecipes} from "@/hooks/useMyRecipes.ts";
 
 const LEVEL_LABEL: Record<string, string> = {
   novice: 'Новичок',
@@ -13,21 +15,44 @@ const LEVEL_LABEL: Record<string, string> = {
   master_chef: 'Мастер-шеф'
 };
 
-type Tab = 'cooked' | 'saved';
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Черновик',
+  pending: 'На модерации',
+  published: 'Опубликован',
+  rejected: 'Отклонён'
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  draft: 'var(--color-text-muted)',
+  pending: 'var(--color-gold)',
+  published: 'var(--color-success)',
+  rejected: '#ff6b6b'
+};
+
+type Tab = 'cooked' | 'saved' | 'my';
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { profile, user, signOut } = useAuthStore();
-  const [tab, setTab] = useState<Tab>('cooked');
+
+  const initialTab = (searchParams.get('tab') as Tab) || 'cooked';
+  const [tab, setTab] = useState<Tab>(initialTab);
+
+  const changeTab = (t: Tab) => {
+    setTab(t);
+    setSearchParams({ tab: t });
+  };
 
   const { data: cookSessions, isLoading: sessionsLoading } = useMyCookSessions();
   const { data: savedRecipes, isLoading: savedLoading } = useSavedRecipes();
+  const { data: myRecipes, isLoading: myLoading } = useMyRecipes();
 
   if (!profile) return null;
 
   return (
     <div className={styles.root}>
-      {/* Шапка профиля */}
+      {/* Header */}
       <section className={styles.header}>
         <div className={styles.avatar}>
           {profile.avatar_url ? (
@@ -42,6 +67,11 @@ export function ProfilePage() {
         <h1 className={styles.displayName}>{profile.display_name}</h1>
         <p className={styles.username}>@{profile.username}</p>
         <div className={styles.levelBadge}>{LEVEL_LABEL[profile.level]}</div>
+
+        {/* Кнопка Создать рецепт */}
+        <button className={styles.createBtn} onClick={() => navigate('/create')}>
+          ➕ Создать рецепт
+        </button>
 
         <div className={styles.stats}>
           <div className={styles.stat}>
@@ -72,7 +102,7 @@ export function ProfilePage() {
       <div className={styles.tabs}>
         <button
           className={`${styles.tab} ${tab === 'cooked' ? styles.tabActive : ''}`}
-          onClick={() => setTab('cooked')}
+          onClick={() => changeTab('cooked')}
         >
           🍳 Приготовлено
           {cookSessions && cookSessions.length > 0 && (
@@ -81,11 +111,20 @@ export function ProfilePage() {
         </button>
         <button
           className={`${styles.tab} ${tab === 'saved' ? styles.tabActive : ''}`}
-          onClick={() => setTab('saved')}
+          onClick={() => changeTab('saved')}
         >
           ❤️ Сохранено
           {savedRecipes && savedRecipes.length > 0 && (
             <span className={styles.tabCount}>{savedRecipes.length}</span>
+          )}
+        </button>
+        <button
+          className={`${styles.tab} ${tab === 'my' ? styles.tabActive : ''}`}
+          onClick={() => changeTab('my')}
+        >
+          📝 Мои
+          {myRecipes && myRecipes.length > 0 && (
+            <span className={styles.tabCount}>{myRecipes.length}</span>
           )}
         </button>
       </div>
@@ -166,6 +205,53 @@ export function ProfilePage() {
                       )}
                     </div>
                     <div className={styles.cookTitle}>{recipe.title}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'my' && (
+          <>
+            {myLoading ? (
+              <div className={styles.loading}><div className={styles.spinner} /></div>
+            ) : !myRecipes || myRecipes.length === 0 ? (
+              <div className={styles.empty}>
+                <div className={styles.emptyIcon}>📝</div>
+                <p className={styles.emptyTitle}>Ещё нет своих рецептов</p>
+                <p className={styles.emptyText}>Поделись своим любимым блюдом — после модерации оно появится в общей ленте.</p>
+                <button className={styles.emptyBtn} onClick={() => navigate('/create')}>
+                  ➕ Создать рецепт
+                </button>
+              </div>
+            ) : (
+              <div className={styles.myList}>
+                {myRecipes.map((recipe) => (
+                  <button
+                    key={recipe.id}
+                    className={styles.myItem}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  >
+                    <div className={styles.myImageWrap}>
+                      {recipe.image_url ? (
+                        <img src={recipe.image_url} alt={recipe.title} loading="lazy" />
+                      ) : (
+                        <div className={styles.cookImagePlaceholder}>🍴</div>
+                      )}
+                    </div>
+                    <div className={styles.myContent}>
+                      <div className={styles.myTitle}>{recipe.title}</div>
+                      <div
+                        className={styles.myStatus}
+                        style={{ color: STATUS_COLOR[recipe.status] }}
+                      >
+                        {STATUS_LABEL[recipe.status]}
+                        {recipe.status === 'rejected' && recipe.rejection_reason && (
+                          <span className={styles.myReason}> — {recipe.rejection_reason}</span>
+                        )}
+                      </div>
+                    </div>
                   </button>
                 ))}
               </div>
