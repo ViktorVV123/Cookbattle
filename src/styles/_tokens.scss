@@ -1,0 +1,54 @@
+// ============ CookBattle Design Tokens ============
+// Dark-first, теплая палитра (еда + огонь + аппетит)
+
+:root {
+  // Primary — "огонь плиты"
+  --color-primary: #ff6b35;
+  --color-primary-hover: #ff7f4f;
+  --color-primary-dim: rgba(255, 107, 53, 0.15);
+
+  // Accent — для XP, ачивок, streak
+  --color-gold: #ffc857;
+  --color-streak: #ff4d4d;
+  --color-success: #4ade80;
+
+  // Нейтральные (dark)
+  --color-bg: #0f0f14;
+  --color-surface: #1a1a22;
+  --color-surface-2: #242430;
+  --color-border: #2e2e3d;
+
+  --color-text: #f5f5f7;
+  --color-text-dim: #a0a0b0;
+  --color-text-muted: #6b6b7a;
+
+  // Радиусы
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  // Тени
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-primary: 0 8px 24px rgba(255, 107, 53, 0.35);
+
+  // Пространство
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  // Типографика
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+
+  // Safe area для PWA на iPhone
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  // Высота нижней навигации
+  --nav-height: 64px;
+}
