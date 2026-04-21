@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import styles from './RecipePage.module.scss';
-import {useRecipe} from "@/hook/useRecipes.ts";
+import {useRecipe} from "@/hooks/useRecipes.ts";
 
 const DIFFICULTY_LABEL: Record<string, string> = {
   easy: 'Легко',

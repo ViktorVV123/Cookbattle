@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import styles from './ProfilePage.module.scss';
-import {useMyCookSessions} from "@/hook/useCookSessions.ts";
-import {useSavedRecipes} from "@/hook/useSaved.ts";
+import {useMyCookSessions} from "@/hooks/useCookSessions.ts";
+import {useSavedRecipes} from "@/hooks/useSaved.ts";
 
 const LEVEL_LABEL: Record<string, string> = {
   novice: 'Новичок',

@@ -5,7 +5,7 @@ import { FeedCard } from './components/FeedCard';
 import { FeedHeader } from './components/FeedHeader';
 import { SwipeHint } from './components/SwipeHint';
 import styles from './FeedPage.module.scss';
-import {useRecipesFeed} from "@/hook/useRecipes.ts";
+import {useRecipesFeed} from "@/hooks/useRecipes.ts";
 
 const HINT_SEEN_KEY = 'cb_swipe_hint_seen';
 

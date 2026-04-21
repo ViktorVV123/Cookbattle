@@ -8,7 +8,7 @@ import { StepTimer } from './components/StepTimer';
 import { PhotoCapture } from './components/PhotoCapture';
 import { ResultModal } from './components/ResultModal';
 import styles from './CookPage.module.scss';
-import {useRecipe} from "@/hook/useRecipes.ts";
+import {useRecipe} from "@/hooks/useRecipes.ts";
 
 type Phase = 'cooking' | 'photo' | 'uploading' | 'done';
 

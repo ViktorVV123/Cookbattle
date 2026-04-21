@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { RecipeCard } from '@/components/recipe/RecipeCard';
 import styles from './SearchPage.module.scss';
-import {RecipeFilters, useRecipeFacets, useRecipesFeed} from "@/hook/useRecipes.ts";
+import {RecipeFilters, useRecipeFacets, useRecipesFeed} from "@/hooks/useRecipes.ts";
 
 
 export function SearchPage() {

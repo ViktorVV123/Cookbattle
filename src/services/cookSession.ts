@@ -101,7 +101,8 @@ export async function submitCookSession(params: {
   }
 
   // 5. Record в БД (атомарная RPC)
-  const { data: rpcData, error: rpcError } = await supabase.rpc('record_cook_session', {
+// 5. Record в БД (атомарная RPC)
+  const { data: rpcData, error: rpcError } = await (supabase as any).rpc('record_cook_session', {
     p_recipe_id: params.recipeId,
     p_photo_url: photoUrl,
     p_ai_score: grading.score,

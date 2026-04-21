@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@/types/database';
 
 import styles from './FeedCard.module.scss';
-import {useSavedRecipeIds, useToggleSaved} from "@/hook/useSaved.ts";
+import {useSavedRecipeIds, useToggleSaved} from "@/hooks/useSaved.ts";
 
 const CATEGORY_EMOJI: Record<string, string> = {
   завтрак: '🍳',

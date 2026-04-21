@@ -71,7 +71,7 @@ export function useToggleSaved() {
       } else {
         const { error } = await supabase
           .from('saved_recipes')
-          .insert({ user_id: userId, recipe_id: recipeId });
+            .insert({ user_id: userId, recipe_id: recipeId } as any);
         if (error) throw error;
       }
       return { recipeId, nowSaved: !currentlySaved };

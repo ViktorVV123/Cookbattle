@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CookSessionResult } from '@/services/cookSession';
 import styles from './ResultModal.module.scss';
-import {useRecipe} from "@/hook/useRecipes.ts";
+import {useRecipe} from "@/hooks/useRecipes.ts";
 import {generateShareCard, shareBlob} from "@/utils/shareCard.ts";
 
 interface Props {
