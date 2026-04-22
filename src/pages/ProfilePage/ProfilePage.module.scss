@@ -450,3 +450,21 @@
   font-weight: 500;
   color: var(--color-text-dim);
 }
+.publicBackBar {
+  padding: calc(var(--safe-top) + var(--space-3)) var(--space-4) var(--space-2);
+}
+
+.publicBackBtn {
+  padding: 8px 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background 0.15s, transform 0.1s;
+  cursor: pointer;
+
+  &:hover { background: var(--color-surface-2); }
+  &:active { transform: scale(0.97); }
+}

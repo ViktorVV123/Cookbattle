@@ -61,10 +61,10 @@ export function CookPage() {
 
   if (!recipe) {
     return (
-      <div className={styles.error}>
-        <h2>Рецепт не найден</h2>
-        <button onClick={() => navigate('/')} className={styles.btn}>← На главную</button>
-      </div>
+        <div className={styles.error}>
+          <h2>Рецепт не найден</h2>
+          <button onClick={() => navigate('/')} className={styles.btn}>← На главную</button>
+        </div>
     );
   }
 
@@ -112,109 +112,123 @@ export function CookPage() {
   // ============ Экран "готовим" ============
   if (phase === 'cooking') {
     return (
-      <div className={styles.root}>
-        {/* Header с прогрессом */}
-        <header className={styles.header}>
-          <button onClick={() => navigate(-1)} className={styles.closeBtn}>
-            ✕
-          </button>
-          <div className={styles.headerCenter}>
-            <div className={styles.recipeTitle}>{recipe.title}</div>
-            <div className={styles.stepCounter}>
-              Шаг {stepIdx + 1} из {steps.length}
+        <div className={styles.root}>
+          {/* Header с прогрессом */}
+          <header className={styles.header}>
+            <button onClick={() => navigate(-1)} className={styles.closeBtn}>
+              ✕
+            </button>
+            <div className={styles.headerCenter}>
+              <div className={styles.recipeTitle}>{recipe.title}</div>
+              <div className={styles.stepCounter}>
+                Шаг {stepIdx + 1} из {steps.length}
+              </div>
             </div>
+            <div className={styles.headerSpacer} />
+          </header>
+
+          <div className={styles.progressBar}>
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
-          <div className={styles.headerSpacer} />
-        </header>
 
-        <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-        </div>
+          {/* Контент шага */}
+          <main className={styles.stepContent}>
+            <div className={styles.stepNumber}>{currentStep.order ?? stepIdx + 1}</div>
 
-        {/* Контент шага */}
-        <main className={styles.stepContent}>
-          <div className={styles.stepNumber}>{currentStep.order ?? stepIdx + 1}</div>
-          <p className={styles.stepText}>{currentStep.text}</p>
+            {/* Картинка шага — есть только у некоторых UGC-рецептов.
+              Показываем до текста, чтобы сначала юзер видел что должно получиться. */}
+            {currentStep.image_url && (
+                <div className={styles.stepImageWrap}>
+                  <img
+                      src={currentStep.image_url}
+                      alt={`Шаг ${stepIdx + 1}`}
+                      className={styles.stepImage}
+                      loading="eager"
+                  />
+                </div>
+            )}
 
-          {currentStep.timer_seconds != null && currentStep.timer_seconds > 0 && (
-            <StepTimer key={`${stepIdx}-${currentStep.timer_seconds}`} seconds={currentStep.timer_seconds} />
-          )}
-        </main>
+            <p className={styles.stepText}>{currentStep.text}</p>
 
-        {/* Нижние кнопки навигации */}
-        <footer className={styles.footer}>
-          <button
-            onClick={prev}
-            disabled={stepIdx === 0}
-            className={`${styles.navBtn} ${styles.navBtnSecondary}`}
-          >
-            ← Назад
-          </button>
+            {currentStep.timer_seconds != null && currentStep.timer_seconds > 0 && (
+                <StepTimer key={`${stepIdx}-${currentStep.timer_seconds}`} seconds={currentStep.timer_seconds} />
+            )}
+          </main>
 
-          {isLastStep ? (
+          {/* Нижние кнопки навигации */}
+          <footer className={styles.footer}>
             <button
-              onClick={() => setPhase('photo')}
-              className={`${styles.navBtn} ${styles.navBtnFinish}`}
+                onClick={prev}
+                disabled={stepIdx === 0}
+                className={`${styles.navBtn} ${styles.navBtnSecondary}`}
             >
-              📸 Готово! Сфоткать
+              ← Назад
             </button>
-          ) : (
-            <button onClick={next} className={`${styles.navBtn} ${styles.navBtnPrimary}`}>
-              Дальше →
-            </button>
-          )}
-        </footer>
-      </div>
+
+            {isLastStep ? (
+                <button
+                    onClick={() => setPhase('photo')}
+                    className={`${styles.navBtn} ${styles.navBtnFinish}`}
+                >
+                  📸 Готово! Сфоткать
+                </button>
+            ) : (
+                <button onClick={next} className={`${styles.navBtn} ${styles.navBtnPrimary}`}>
+                  Дальше →
+                </button>
+            )}
+          </footer>
+        </div>
     );
   }
 
   // ============ Экран "фотографируем" ============
   if (phase === 'photo') {
     return (
-      <div className={styles.photoPhaseRoot}>
-        <header className={styles.photoHeader}>
-          <button onClick={() => setPhase('cooking')} className={styles.backBtn}>
-            ←
-          </button>
-          <h1 className={styles.photoTitle}>Покажи результат</h1>
-        </header>
+        <div className={styles.photoPhaseRoot}>
+          <header className={styles.photoHeader}>
+            <button onClick={() => setPhase('cooking')} className={styles.backBtn}>
+              ←
+            </button>
+            <h1 className={styles.photoTitle}>Покажи результат</h1>
+          </header>
 
-        <div className={styles.photoContent}>
-          <p className={styles.photoDescription}>
-            Сфоткай блюдо — AI оценит подачу и даст совет.
-          </p>
+          <div className={styles.photoContent}>
+            <p className={styles.photoDescription}>
+              Сфоткай блюдо — AI оценит подачу и даст совет.
+            </p>
 
-          {error && <div className={styles.errorMsg}>{error}</div>}
+            {error && <div className={styles.errorMsg}>{error}</div>}
 
-          <PhotoCapture onConfirm={handlePhotoConfirm} />
+            <PhotoCapture onConfirm={handlePhotoConfirm} />
+          </div>
         </div>
-      </div>
     );
   }
 
   // ============ Экран "загрузка и AI думает" ============
   if (phase === 'uploading') {
     return (
-      <div className={styles.uploadRoot}>
-        {photoPreview && (
-          <img src={photoPreview} alt="Твоё блюдо" className={styles.uploadPhoto} />
-        )}
-        <div className={styles.uploadSpinner} />
-        <div className={styles.uploadTitle}>AI анализирует подачу…</div>
-        <div className={styles.uploadHint}>Это занимает 5-10 секунд</div>
-      </div>
+        <div className={styles.uploadRoot}>
+          {photoPreview && (
+              <img src={photoPreview} alt="Твоё блюдо" className={styles.uploadPhoto} />
+          )}
+          <div className={styles.uploadSpinner} />
+          <div className={styles.uploadTitle}>AI анализирует подачу…</div>
+          <div className={styles.uploadHint}>Это занимает 5-10 секунд</div>
+        </div>
     );
   }
 
   // ============ Экран результата ============
   if (phase === 'done' && result && photoPreview) {
     return (
-      <ResultModal
-        result={result}
-        photoUrl={photoPreview}
-        recipeId={recipe.id}
-        onClose={() => navigate(`/recipe/${recipe.id}`)}
-      />
+        <ResultModal
+            result={result}
+            photoUrl={photoPreview}
+            recipeId={recipe.id}
+            onClose={() => navigate(`/recipe/${recipe.id}`)}
+        />
     );
   }
 
