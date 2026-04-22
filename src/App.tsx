@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -29,6 +28,9 @@ function App() {
     if (loading) return <SplashScreen />;
 
     if (!user) {
+        // Незалогиненные попадают на /auth. AuthPage сам рендерит лендинг
+        // с hero-секцией и боттом-шитом для формы входа/регистрации.
+        // Всё с /* редиректится на /auth.
         return (
             <Routes>
                 <Route path="/auth" element={<AuthPage />} />
