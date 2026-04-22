@@ -39,6 +39,44 @@ function emptyInput(): CreateRecipeInput {
   };
 }
 
+/**
+ * Возвращает null если шаг валиден, иначе — текст что не так.
+ */
+function validateStep(step: StepNum, input: CreateRecipeInput): string | null {
+  switch (step) {
+    case 1:
+      if (input.title.trim().length < 3) return 'Название слишком короткое (минимум 3 символа)';
+      if (input.description.trim().length < 10) return 'Описание слишком короткое (минимум 10 символов)';
+      if (!input.cuisine) return 'Выбери кухню';
+      if (!input.category) return 'Выбери категорию';
+      return null;
+
+    case 2:
+      if (input.prep_time_min + input.cook_time_min <= 0) return 'Укажи время готовки (хотя бы один из двух таймеров больше 0)';
+      if (input.servings < 1) return 'Укажи хотя бы 1 порцию';
+      return null;
+
+    case 3:
+      if (input.ingredients.length < 2) return `Добавь минимум 2 ингредиента (сейчас ${input.ingredients.length})`;
+      return null;
+
+    case 4: {
+      if (input.steps.length < 2) return `Добавь минимум 2 шага (сейчас ${input.steps.length})`;
+      const shortSteps = input.steps
+          .map((s, i) => ({ i: i + 1, len: s.text.trim().length }))
+          .filter((s) => s.len < 5);
+      if (shortSteps.length > 0) {
+        const nums = shortSteps.map((s) => s.i).join(', ');
+        return `Опиши подробнее шаг ${nums} (минимум 5 символов)`;
+      }
+      return null;
+    }
+
+    case 5:
+      return null;
+  }
+}
+
 export function CreateRecipePage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<StepNum>(1);
@@ -48,30 +86,11 @@ export function CreateRecipePage() {
 
   const createMutation = useCreateRecipe();
 
-  // Валидация по шагам
-  const canGoNext = (): boolean => {
-    switch (step) {
-      case 1:
-        return input.title.trim().length >= 3
-            && input.description.trim().length >= 10
-            && !!input.cuisine
-            && !!input.category;
-      case 2:
-        return input.prep_time_min >= 0
-            && input.cook_time_min >= 0
-            && (input.prep_time_min + input.cook_time_min) > 0
-            && input.servings >= 1;
-      case 3:
-        return input.ingredients.length >= 2;
-      case 4:
-        return input.steps.length >= 2 && input.steps.every((s) => s.text.trim().length >= 5);
-      case 5:
-        return true;
-    }
-  };
+  const validationError = validateStep(step, input);
+  const canGoNext = validationError === null;
 
   const next = () => {
-    if (!canGoNext()) return;
+    if (!canGoNext) return;
     if (step < 5) setStep((step + 1) as StepNum);
   };
   const prev = () => {
@@ -124,32 +143,41 @@ export function CreateRecipePage() {
 
         {/* Footer */}
         <footer className={styles.footer}>
-          <button onClick={prev} disabled={step === 1} className={styles.btnSecondary}>
-            ← Назад
-          </button>
-
-          {step < 5 ? (
-              <button onClick={next} disabled={!canGoNext()} className={styles.btnPrimary}>
-                Дальше →
-              </button>
-          ) : (
-              <div className={styles.finalButtons}>
-                <button
-                    onClick={() => handleSubmit(false)}
-                    disabled={submitting}
-                    className={styles.btnSecondary}
-                >
-                  {submitting ? '…' : '💾 В черновики'}
-                </button>
-                <button
-                    onClick={() => handleSubmit(true)}
-                    disabled={submitting}
-                    className={styles.btnPublish}
-                >
-                  {submitting ? 'Отправляем…' : '📤 На модерацию'}
-                </button>
+          {/* Подсказка что заполнить */}
+          {step < 5 && validationError && (
+              <div className={styles.validationHint}>
+                ⚠️ {validationError}
               </div>
           )}
+
+          <div className={styles.footerButtons}>
+            <button onClick={prev} disabled={step === 1} className={styles.btnSecondary}>
+              ← Назад
+            </button>
+
+            {step < 5 ? (
+                <button onClick={next} disabled={!canGoNext} className={styles.btnPrimary}>
+                  Дальше →
+                </button>
+            ) : (
+                <div className={styles.finalButtons}>
+                  <button
+                      onClick={() => handleSubmit(false)}
+                      disabled={submitting}
+                      className={styles.btnSecondary}
+                  >
+                    {submitting ? '…' : '💾 В черновики'}
+                  </button>
+                  <button
+                      onClick={() => handleSubmit(true)}
+                      disabled={submitting}
+                      className={styles.btnPublish}
+                  >
+                    {submitting ? 'Отправляем…' : '📤 На модерацию'}
+                  </button>
+                </div>
+            )}
+          </div>
         </footer>
       </div>
   );
