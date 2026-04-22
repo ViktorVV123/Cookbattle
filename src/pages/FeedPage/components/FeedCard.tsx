@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@/types/database';
 import { HeartIcon, HeartFilledIcon, BookIcon, ShareIcon } from '@/components/icons/ActionIcons';
+import { AuthorLine } from '@/components/recipe/AuthorLine';
+import { formatCount } from '@/utils/formatCount';
 
 import styles from './FeedCard.module.scss';
 import {useSavedRecipeIds, useToggleSaved} from "@/hooks/useSaved.ts";
@@ -83,18 +85,20 @@ export function FeedCard({ recipe, index, isActive }: Props) {
           <div className={styles.gradient} />
         </div>
 
-        {/* Правые действия */}
+        {/* Правые действия — TikTok-стиль: иконка сверху, цифра снизу */}
         <div className={styles.actions}>
           <button
               className={`${styles.actionBtn} ${isSaved ? styles.actionLiked : ''}`}
               onClick={handleSaveToggle}
-              aria-label={isSaved ? 'Убрать из сохранённых' : 'Сохранить'}
+              aria-label={isSaved ? 'Убрать лайк' : 'Лайк'}
               disabled={toggleSaved.isPending}
           >
           <span className={styles.actionIcon}>
             {isSaved ? <HeartFilledIcon size={32} /> : <HeartIcon size={32} />}
           </span>
-            <span className={styles.actionLabel}>Сохр.</span>
+            <span className={styles.actionCount}>
+            {recipe.likes_count > 0 ? formatCount(recipe.likes_count) : ''}
+          </span>
           </button>
 
           <button
@@ -116,12 +120,19 @@ export function FeedCard({ recipe, index, isActive }: Props) {
           <span className={styles.actionIcon}>
             <ShareIcon size={32} />
           </span>
-            <span className={styles.actionLabel}>Поделиться</span>
+            <span className={styles.actionLabel}>Шарить</span>
           </button>
         </div>
 
         {/* Контент снизу */}
         <div className={styles.content}>
+          {/* Автор — только для UGC (author_id != null). Засиженные без автора. */}
+          {recipe.author_id && (
+              <div className={styles.authorWrap}>
+                <AuthorLine authorId={recipe.author_id} size="sm" variant="dark" />
+              </div>
+          )}
+
           <div className={styles.badges}>
             <span className={styles.badge}>{recipe.cuisine}</span>
             <span className={styles.badge}>⏱ {totalTime} мин</span>

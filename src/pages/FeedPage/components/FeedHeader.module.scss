@@ -102,3 +102,12 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+.actionCount {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.2px;
+  min-height: 14px; // зарезервировать место даже если 0 — чтобы иконки не прыгали
+}
+
