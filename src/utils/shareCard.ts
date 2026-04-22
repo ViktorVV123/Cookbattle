@@ -25,6 +25,8 @@ const COLORS = {
   bgMid: '#1a1a22',
   primary: '#ff6b35',
   gold: '#ffc857',
+  goldLight: '#f5d08a',
+  goldDark: '#a87020',
   success: '#4ade80',
   textLight: '#f5f5f7',
   textDim: '#a0a0b0',
@@ -53,12 +55,12 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
 
 /** Помощник: рисует прямоугольник со скруглёнными углами */
 function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number
 ) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -69,12 +71,75 @@ function roundRect(
   ctx.closePath();
 }
 
+/**
+ * Рисует логотип-шапку шефа с золотым контуром.
+ * cx, cy — центр, size — итоговый размер квадрата (px).
+ * Форма повторяет SVG из ChefHatLogo — viewBox 0..200 масштабируем в size.
+ */
+function drawChefHat(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number) {
+  ctx.save();
+  // Переносим 0,0 в левый-верхний угол логотипа и масштабируем "как будто" viewBox 200x200
+  const s = size / 200;
+  ctx.translate(cx - size / 2, cy - size / 2);
+  ctx.scale(s, s);
+
+  // Градиент для контура
+  const goldGrad = ctx.createLinearGradient(0, 0, 0, 200);
+  goldGrad.addColorStop(0, COLORS.goldLight);
+  goldGrad.addColorStop(0.55, COLORS.gold);
+  goldGrad.addColorStop(1, COLORS.goldDark);
+
+  ctx.strokeStyle = goldGrad;
+  ctx.lineWidth = 5.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  // Верх: три облачка (те же координаты, что в SVG)
+  ctx.beginPath();
+  ctx.moveTo(50, 120);
+  ctx.bezierCurveTo(22, 120, 18, 85, 42, 75);
+  ctx.bezierCurveTo(30, 48, 62, 30, 78, 52);
+  ctx.bezierCurveTo(84, 28, 118, 26, 124, 52);
+  ctx.bezierCurveTo(142, 32, 176, 50, 160, 78);
+  ctx.bezierCurveTo(182, 88, 178, 122, 150, 120);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Манжет
+  ctx.beginPath();
+  ctx.moveTo(55, 120);
+  ctx.lineTo(55, 152);
+  ctx.quadraticCurveTo(55, 162, 65, 162);
+  ctx.lineTo(135, 162);
+  ctx.quadraticCurveTo(145, 162, 145, 152);
+  ctx.lineTo(145, 120);
+  ctx.stroke();
+
+  // Линия-перегиб
+  ctx.beginPath();
+  ctx.moveTo(58, 132);
+  ctx.lineTo(142, 132);
+  ctx.stroke();
+
+  // Складочки — отдельный solid-цвет, тоньше
+  ctx.strokeStyle = '#e6b970';
+  ctx.lineWidth = 3;
+  for (const x of [80, 100, 120]) {
+    ctx.beginPath();
+    ctx.moveTo(x, 140);
+    ctx.lineTo(x, 156);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 /** Переносит длинный текст по словам в несколько строк, возвращает массив строк */
 function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-  maxLines: number
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number,
+    maxLines: number
 ): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
@@ -136,16 +201,29 @@ export async function generateShareCard(params: ShareCardParams): Promise<Blob> 
   ctx.fill();
   ctx.restore();
 
-  // ============ Watermark CookBattle сверху ============
-  ctx.fillStyle = COLORS.textDim;
-  ctx.font = '600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('🍳 COOKBATTLE', W / 2, 100);
+  // ============ Watermark: шапка шефа + COOKBATTLE ============
+  // Рисуем логотип слева от текста, чтобы вместе смотрелись как фирменный знак
+  const wmY = 100;
+  const wmGap = 18;
+
+  ctx.font = '800 44px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const wmText = 'COOKBATTLE';
+  const textW = ctx.measureText(wmText).width;
+  const logoSize = 70;
+  const totalW = logoSize + wmGap + textW;
+  const startX = (W - totalW) / 2;
+
+  drawChefHat(ctx, startX + logoSize / 2, wmY, logoSize);
+
+  ctx.fillStyle = COLORS.textLight;
+  ctx.fillText(wmText, startX + logoSize + wmGap, wmY);
 
   // ============ Фото блюда с закруглёнными углами ============
   const photoSize = 720;
   const photoX = (W - photoSize) / 2;
-  const photoY = 170;
+  const photoY = 200;
   const photoRadius = 40;
 
   const img = await loadImage(params.photoUrl);
@@ -263,9 +341,9 @@ export async function generateShareCard(params: ShareCardParams): Promise<Blob> 
   // ============ Экспорт в Blob ============
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Не удалось сгенерировать PNG'))),
-      'image/png',
-      0.95
+        (blob) => (blob ? resolve(blob) : reject(new Error('Не удалось сгенерировать PNG'))),
+        'image/png',
+        0.95
     );
   });
 }

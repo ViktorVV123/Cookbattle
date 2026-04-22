@@ -109,7 +109,7 @@ export function FeedCard({ recipe, index, isActive }: Props) {
           aria-label="Поделиться"
         >
           <span className={styles.actionIcon}>📤</span>
-          <span className={styles.actionLabel}>Шарить</span>
+          <span className={styles.actionLabel}>Поделиться</span>
         </button>
       </div>
 

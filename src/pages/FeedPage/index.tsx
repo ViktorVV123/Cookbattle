@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { FeedCard } from './components/FeedCard';
 import { FeedHeader } from './components/FeedHeader';
 import { SwipeHint } from './components/SwipeHint';
+import { markAsViewed } from '@/utils/feedPersonalization';
 import styles from './FeedPage.module.scss';
 import {useRecipesFeed} from "@/hooks/useRecipes.ts";
 
@@ -11,6 +12,7 @@ const HINT_SEEN_KEY = 'cb_swipe_hint_seen';
 
 export function FeedPage() {
   const profile = useAuthStore((s) => s.profile);
+  const userId = useAuthStore((s) => s.user?.id);
   const navigate = useNavigate();
 
   const {
@@ -41,97 +43,113 @@ export function FeedPage() {
     localStorage.setItem(HINT_SEEN_KEY, '1');
   };
 
-  // IntersectionObserver: трекаем какая карточка видна, подгружаем страницы
+  // Помечаем первую видимую карточку как увиденную сразу при загрузке ленты —
+  // без этого юзер, который открыл ленту и сразу ушёл, завтра увидит ровно
+  // ту же самую первую карточку (shuffle детерминирован).
+  useEffect(() => {
+    if (!userId || recipes.length === 0) return;
+    markAsViewed(userId, recipes[0].id);
+  }, [userId, recipes.length > 0 ? recipes[0].id : null]);
+
+  // IntersectionObserver: трекаем какая карточка видна, подгружаем страницы,
+  // помечаем увиденное в localStorage.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-            const idx = Number((entry.target as HTMLElement).dataset.index);
-            setActiveIndex(idx);
-            // Скрыть hint при первом свайпе
-            if (idx > 0) dismissHint();
-            // Если долистали до предпоследнего — грузим следующую страницу
-            if (idx >= recipes.length - 3 && hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+              const idx = Number((entry.target as HTMLElement).dataset.index);
+              setActiveIndex(idx);
+
+              // Помечаем рецепт как виденный — при следующем заходе в ленту
+              // он уйдёт в конец очереди. Вызов идемпотентен (дубли игнорятся).
+              if (userId && recipes[idx]) {
+                markAsViewed(userId, recipes[idx].id);
+              }
+
+              // Скрыть hint при первом свайпе
+              if (idx > 0) dismissHint();
+              // Если долистали до предпоследнего — грузим следующую страницу
+              if (idx >= recipes.length - 3 && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
             }
-          }
-        });
-      },
-      {
-        root: container,
-        threshold: [0.6]
-      }
+          });
+        },
+        {
+          root: container,
+          threshold: [0.6]
+        }
     );
 
     container.querySelectorAll('[data-feed-item]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [recipes.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [recipes.length, hasNextPage, isFetchingNextPage, fetchNextPage, userId]);
 
   if (isLoading) {
     return (
-      <div className={styles.centered}>
-        <div className={styles.spinner} />
-      </div>
+        <div className={styles.centered}>
+          <div className={styles.spinner} />
+        </div>
     );
   }
 
   if (isError) {
     return (
-      <div className={styles.centered}>
-        <p className={styles.errorText}>⚠️ Не удалось загрузить ленту</p>
-      </div>
+        <div className={styles.centered}>
+          <p className={styles.errorText}>⚠️ Не удалось загрузить ленту</p>
+        </div>
     );
   }
 
   if (recipes.length === 0) {
     return (
-      <div className={styles.centered}>
-        <div className={styles.emptyIcon}>🥘</div>
-        <h2 className={styles.emptyTitle}>Пока пусто</h2>
-        <p className={styles.emptyText}>Рецепты скоро появятся.</p>
-      </div>
+        <div className={styles.centered}>
+          <div className={styles.emptyIcon}>🥘</div>
+          <h2 className={styles.emptyTitle}>Пока пусто</h2>
+          <p className={styles.emptyText}>Рецепты скоро появятся.</p>
+        </div>
     );
   }
 
   return (
-    <div className={styles.root}>
-      {/* Header поверх ленты */}
-      <FeedHeader profile={profile} onAvatarClick={() => navigate('/profile')} />
+      <div className={styles.root}>
+        {/* Header поверх ленты */}
+        <FeedHeader profile={profile} onAvatarClick={() => navigate('/profile')} />
 
-      {/* Hint про свайп */}
-      {showHint && <SwipeHint onDismiss={dismissHint} />}
+        {/* Hint про свайп */}
+        {showHint && <SwipeHint onDismiss={dismissHint} />}
 
-      {/* Контейнер со scroll-snap */}
-      <div ref={containerRef} className={styles.feed}>
-        {recipes.map((recipe, idx) => (
-          <FeedCard
-            key={recipe.id}
-            recipe={recipe}
-            index={idx}
-            isActive={idx === activeIndex}
-          />
-        ))}
+        {/* Контейнер со scroll-snap */}
+        <div ref={containerRef} className={styles.feed}>
+          {recipes.map((recipe, idx) => (
+              <FeedCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  index={idx}
+                  isActive={idx === activeIndex}
+              />
+          ))}
 
-        {/* Индикатор подгрузки */}
-        {isFetchingNextPage && (
-          <div className={styles.loadingMore}>
-            <div className={styles.spinner} />
-          </div>
-        )}
+          {/* Индикатор подгрузки */}
+          {isFetchingNextPage && (
+              <div className={styles.loadingMore}>
+                <div className={styles.spinner} />
+              </div>
+          )}
 
-        {/* Конец ленты */}
-        {!hasNextPage && recipes.length > 0 && (
-          <div className={styles.endOfFeed}>
-            <div className={styles.endIcon}>🎉</div>
-            <p>Ты долистал до конца!</p>
-            <p className={styles.endSub}>Больше рецептов будет добавлено.</p>
-          </div>
-        )}
+          {/* Конец ленты */}
+          {!hasNextPage && recipes.length > 0 && (
+              <div className={styles.endOfFeed}>
+                <div className={styles.endIcon}>🎉</div>
+                <p>Ты долистал до конца!</p>
+                <p className={styles.endSub}>Больше рецептов будет добавлено.</p>
+              </div>
+          )}
+        </div>
       </div>
-    </div>
   );
 }

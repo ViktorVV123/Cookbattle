@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/services/supabase';
+import { ChefHatLogo } from '@/components/common/ChefHatLogo';
 import styles from './AuthPage.module.scss';
 
 type Mode = 'login' | 'register' | 'magic';
@@ -124,7 +125,7 @@ export function AuthPage() {
 
   return (
       <div className={styles.root}>
-        <div className={styles.logo}>🍳</div>
+        <ChefHatLogo size={88} className={styles.logo} />
         <h1 className={styles.title}>CookBattle</h1>
         <p className={styles.subtitle}>Готовь. Фоткай. Получай оценку AI.</p>
 

@@ -1,3 +1,5 @@
+// Контейнер на весь экран НО прозрачный для касаний — свайп проходит сквозь
+// него в ленту. Интерактивной остаётся только кнопка "Понятно".
 .root {
   position: fixed;
   inset: 0;
@@ -5,11 +7,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
   animation: fadeIn 0.3s ease-out;
-  cursor: pointer;
 }
 
 .content {
@@ -19,29 +18,54 @@
   gap: var(--space-3);
   color: #fff;
   text-align: center;
-  padding: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .arrow {
-  font-size: 80px;
+  font-size: 64px;
   animation: swipeUp 1.5s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
 .text {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.3px;
 }
 
 .sub {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+}
+
+// Единственный интерактивный элемент — поэтому возвращаем pointer-events
+.closeBtn {
+  margin-top: var(--space-2);
+  padding: 10px 24px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
   font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:active {
+    transform: scale(0.96);
+    background: #fff;
+  }
 }
 
 @keyframes swipeUp {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
+  50% { transform: translateY(-24px); }
 }
 
 @keyframes fadeIn {
