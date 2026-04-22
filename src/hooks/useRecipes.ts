@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/services/supabase';
 import { useAuthStore } from '@/store/authStore';
@@ -28,8 +29,7 @@ function hasActiveFilters(f: RecipeFilters): boolean {
  * Два режима:
  *
  *  1. С фильтрами (search/cuisine/category/difficulty) — классическая серверная
- *     сортировка по created_at desc. Персонализация отключена: когда юзер ищет
- *     "карбонара", ему нужна релевантность, а не shuffle.
+ *     сортировка по created_at desc. Персонализация отключена.
  *
  *  2. Без фильтров (дефолтная лента) — персональная очередь:
  *       - Индекс (id + created_at) тянется одним лёгким запросом и кэшируется
@@ -42,12 +42,11 @@ export function useRecipesFeed(filters: RecipeFilters = {}) {
   const userId = useAuthStore((s) => s.user?.id);
   const filtered = hasActiveFilters(filters);
 
-  // Индекс рецептов для дефолтной ленты. Персонализация считается ОДИН раз при
-  // открытии ленты — дальше страницы идут по уже построенной очереди.
+  // Индекс рецептов для дефолтной ленты
   const indexQuery = useQuery({
     queryKey: ['recipes', 'index'],
     enabled: !filtered,
-    staleTime: 1000 * 60 * 5, // 5 минут — свежие рецепты подтянутся при след. открытии
+    staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       const { data, error } = await supabase
           .from('recipes')
@@ -61,21 +60,22 @@ export function useRecipesFeed(filters: RecipeFilters = {}) {
     }
   });
 
-  // Персональная очередь id — строится из индекса один раз при смене юзера/индекса.
-  // Важно: viewedIds читаются ОДИН раз здесь, при построении очереди, а не на
-  // каждый рендер. Если юзер свайпает и помечает новые рецепты как viewed —
-  // они учтутся только при следующем открытии ленты (иначе infinite scroll
-  // сломается от перестройки очереди на ходу).
-  const queue: string[] = (() => {
+  // Персональная очередь id. Мемоизируем — иначе на каждый рендер создаётся
+  // новый массив, queryFn замыкается на новую ссылку, что может приводить к
+  // странностям с инвалидацией кэша React Query.
+  //
+  // viewedIds читаются ОДИН раз при построении очереди, не на каждый рендер.
+  // Если юзер свайпает и помечает новые рецепты как viewed — они учтутся
+  // только при следующем открытии ленты (иначе infinite scroll сломается
+  // от перестройки очереди на ходу).
+  const queue: string[] = useMemo(() => {
     if (filtered || !userId || !indexQuery.data) return [];
     const viewed = getViewedIds(userId);
     return buildFeedQueue(indexQuery.data, userId, viewed);
-  })();
+  }, [filtered, userId, indexQuery.data]);
 
   return useInfiniteQuery({
-    // queryKey зависит от userId — при смене аккаунта очередь строится заново
     queryKey: ['recipes', 'feed', filters, filtered ? 'filtered' : `personal:${userId}`],
-    // Ждём индекс если он нужен
     enabled: filtered || (!!userId && !!indexQuery.data),
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
@@ -100,7 +100,6 @@ export function useRecipesFeed(filters: RecipeFilters = {}) {
       }
 
       // ============ Режим персональной ленты ============
-      // Берём нужный срез очереди и подгружаем полные рецепты по id
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE;
       const pageIds = queue.slice(from, to);
@@ -124,14 +123,11 @@ export function useRecipesFeed(filters: RecipeFilters = {}) {
       for (const id of pageIds) {
         const r = byId.get(id);
         if (r) ordered.push(r);
-        // Если рецепт пропал между построением индекса и загрузкой страницы
-        // (например, админ снял с публикации) — просто пропускаем, без падения
       }
       return ordered;
     },
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.length < PAGE_SIZE) return undefined;
-      // В персональном режиме: не запрашиваем страницу за пределами очереди
       if (!filtered && (allPages.length * PAGE_SIZE) >= queue.length) return undefined;
       return allPages.length;
     }

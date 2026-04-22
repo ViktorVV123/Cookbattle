@@ -115,7 +115,7 @@ export function ResultModal({ result, photoUrl, recipeId, onClose }: Props) {
         {/* Комментарий AI */}
         {revealed.comment && (
           <div className={styles.commentBlock}>
-            <div className={styles.commentLabel}>💬 Claude говорит:</div>
+            <div className={styles.commentLabel}>💬 AI говорит:</div>
             <p className={styles.commentText}>{result.grading.comment}</p>
           </div>
         )}

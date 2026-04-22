@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@/types/database';
+import { HeartIcon, HeartFilledIcon, BookIcon, ShareIcon } from '@/components/icons/ActionIcons';
 
 import styles from './FeedCard.module.scss';
 import {useSavedRecipeIds, useToggleSaved} from "@/hooks/useSaved.ts";
@@ -59,81 +60,87 @@ export function FeedCard({ recipe, index, isActive }: Props) {
   };
 
   return (
-    <div className={styles.card} data-feed-item data-index={index}>
-      {/* Фон: картинка или эмодзи-заглушка */}
-      <div className={styles.imageLayer}>
-        {recipe.image_url ? (
-          <>
-            <img
-              src={recipe.image_url}
-              alt={recipe.title}
-              className={`${styles.image} ${imageLoaded ? styles.imageLoaded : ''}`}
-              onLoad={() => setImageLoaded(true)}
-              loading={isActive || index < 3 ? 'eager' : 'lazy'}
-            />
-            {!imageLoaded && <div className={styles.imageBlur} />}
-          </>
-        ) : (
-          <div className={styles.placeholder}>
-            <div className={styles.placeholderEmoji}>{emoji}</div>
-          </div>
-        )}
+      <div className={styles.card} data-feed-item data-index={index}>
+        {/* Фон: картинка или эмодзи-заглушка */}
+        <div className={styles.imageLayer}>
+          {recipe.image_url ? (
+              <>
+                <img
+                    src={recipe.image_url}
+                    alt={recipe.title}
+                    className={`${styles.image} ${imageLoaded ? styles.imageLoaded : ''}`}
+                    onLoad={() => setImageLoaded(true)}
+                    loading={isActive || index < 3 ? 'eager' : 'lazy'}
+                />
+                {!imageLoaded && <div className={styles.imageBlur} />}
+              </>
+          ) : (
+              <div className={styles.placeholder}>
+                <div className={styles.placeholderEmoji}>{emoji}</div>
+              </div>
+          )}
 
-        <div className={styles.gradient} />
-      </div>
-
-      {/* Правые действия */}
-      <div className={styles.actions}>
-        <button
-          className={`${styles.actionBtn} ${isSaved ? styles.actionLiked : ''}`}
-          onClick={handleSaveToggle}
-          aria-label={isSaved ? 'Убрать из сохранённых' : 'Сохранить'}
-          disabled={toggleSaved.isPending}
-        >
-          <span className={styles.actionIcon}>{isSaved ? '❤️' : '🤍'}</span>
-          <span className={styles.actionLabel}>Сохр.</span>
-        </button>
-
-        <button
-          className={styles.actionBtn}
-          onClick={() => navigate(`/recipe/${recipe.id}`)}
-          aria-label="Подробнее"
-        >
-          <span className={styles.actionIcon}>📖</span>
-          <span className={styles.actionLabel}>Рецепт</span>
-        </button>
-
-        <button
-          className={styles.actionBtn}
-          onClick={handleShare}
-          aria-label="Поделиться"
-        >
-          <span className={styles.actionIcon}>📤</span>
-          <span className={styles.actionLabel}>Поделиться</span>
-        </button>
-      </div>
-
-      {/* Контент снизу */}
-      <div className={styles.content}>
-        <div className={styles.badges}>
-          <span className={styles.badge}>{recipe.cuisine}</span>
-          <span className={styles.badge}>⏱ {totalTime} мин</span>
-          <span className={styles.badge}>{DIFFICULTY_LABEL[recipe.difficulty]}</span>
+          <div className={styles.gradient} />
         </div>
 
-        <h2 className={styles.title}>{recipe.title}</h2>
+        {/* Правые действия */}
+        <div className={styles.actions}>
+          <button
+              className={`${styles.actionBtn} ${isSaved ? styles.actionLiked : ''}`}
+              onClick={handleSaveToggle}
+              aria-label={isSaved ? 'Убрать из сохранённых' : 'Сохранить'}
+              disabled={toggleSaved.isPending}
+          >
+          <span className={styles.actionIcon}>
+            {isSaved ? <HeartFilledIcon size={32} /> : <HeartIcon size={32} />}
+          </span>
+            <span className={styles.actionLabel}>Сохр.</span>
+          </button>
 
-        {recipe.description && (
-          <p className={styles.description}>{recipe.description}</p>
-        )}
+          <button
+              className={styles.actionBtn}
+              onClick={() => navigate(`/recipe/${recipe.id}`)}
+              aria-label="Подробнее"
+          >
+          <span className={styles.actionIcon}>
+            <BookIcon size={32} />
+          </span>
+            <span className={styles.actionLabel}>Рецепт</span>
+          </button>
 
-        <button
-          className={styles.ctaButton}
-          onClick={() => navigate(`/cook/${recipe.id}`)}
-        >
-          🍳 Готовлю!
-        </button>
+          <button
+              className={styles.actionBtn}
+              onClick={handleShare}
+              aria-label="Поделиться"
+          >
+          <span className={styles.actionIcon}>
+            <ShareIcon size={32} />
+          </span>
+            <span className={styles.actionLabel}>Поделиться</span>
+          </button>
+        </div>
+
+        {/* Контент снизу */}
+        <div className={styles.content}>
+          <div className={styles.badges}>
+            <span className={styles.badge}>{recipe.cuisine}</span>
+            <span className={styles.badge}>⏱ {totalTime} мин</span>
+            <span className={styles.badge}>{DIFFICULTY_LABEL[recipe.difficulty]}</span>
+          </div>
+
+          <h2 className={styles.title}>{recipe.title}</h2>
+
+          {recipe.description && (
+              <p className={styles.description}>{recipe.description}</p>
+          )}
+
+          <button
+              className={styles.ctaButton}
+              onClick={() => navigate(`/cook/${recipe.id}`)}
+          >
+            🍳 Готовлю!
+          </button>
+        </div>
       </div>
-    </div>
   );
 }

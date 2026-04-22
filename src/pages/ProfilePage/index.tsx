@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { useMyCookSessions } from '@/hooks/useCookSessions';
+import { useMyCookSessions, type CookSessionWithRecipe } from '@/hooks/useCookSessions';
 import { useSavedRecipes } from '@/hooks/useSaved';
 import { useMyRecipes } from '@/hooks/useMyRecipes';
+import { CookSessionModal } from './components/CookSessionModal';
 import styles from './ProfilePage.module.scss';
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -37,6 +38,9 @@ export function ProfilePage() {
 
   const initialTab = (searchParams.get('tab') as Tab) || 'cooked';
   const [tab, setTab] = useState<Tab>(initialTab);
+
+  // Выбранная сессия для показа в модалке. null = модалка закрыта.
+  const [selectedSession, setSelectedSession] = useState<CookSessionWithRecipe | null>(null);
 
   const changeTab = (t: Tab) => {
     setTab(t);
@@ -156,7 +160,7 @@ export function ProfilePage() {
                           <button
                               key={session.id}
                               className={styles.cookItem}
-                              onClick={() => session.recipe && navigate(`/recipe/${session.recipe.id}`)}
+                              onClick={() => setSelectedSession(session)}
                           >
                             <div className={styles.cookImageWrap}>
                               <img
@@ -287,6 +291,14 @@ export function ProfilePage() {
             Выйти
           </button>
         </div>
+
+        {/* Модалка просмотра результата AI */}
+        {selectedSession && (
+            <CookSessionModal
+                session={selectedSession}
+                onClose={() => setSelectedSession(null)}
+            />
+        )}
       </div>
   );
 }

@@ -7,20 +7,33 @@ interface Props {
   disabled?: boolean;
 }
 
+type RetakeSource = 'camera' | 'gallery';
+
 export function PhotoCapture({ onConfirm, disabled }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Два отдельных input'а: camera использует capture="environment", gallery — без него.
+  // На мобиле capture="environment" сразу открывает камеру, без него — показывается
+  // выбор источника / файловый пикер. Одной кнопкой двух поведений не получить,
+  // поэтому явно два инпута.
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
   const [preview, setPreview] = useState<string | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Запоминаем каким способом юзер загрузил фото — чтобы "переснять" открыло
+  // тот же источник. Если сделал камерой — снова камеру; если из галереи — галерею.
+  const [lastSource, setLastSource] = useState<RetakeSource>('camera');
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>, source: RetakeSource) => {
     const file = e.target.files?.[0];
+    // Всегда чистим value — чтобы выбор того же файла повторно триггерил onChange
+    if (e.target) e.target.value = '';
     if (!file) return;
 
     setError(null);
+    setLastSource(source);
 
-    // Принимаем всё что начинается с image/
     if (!file.type.startsWith('image/')) {
       setError('Файл должен быть картинкой');
       return;
@@ -47,8 +60,6 @@ export function PhotoCapture({ onConfirm, disabled }: Props) {
       );
     } finally {
       setProcessing(false);
-      // Сбрасываем input чтобы можно было выбрать тот же файл повторно
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -57,7 +68,12 @@ export function PhotoCapture({ onConfirm, disabled }: Props) {
     setPreview(null);
     setBlob(null);
     setError(null);
-    fileInputRef.current?.click();
+    // Открываем тот же источник что в прошлый раз
+    if (lastSource === 'camera') {
+      cameraInputRef.current?.click();
+    } else {
+      galleryInputRef.current?.click();
+    }
   };
 
   const confirm = () => {
@@ -91,6 +107,23 @@ export function PhotoCapture({ onConfirm, disabled }: Props) {
               ✨ Отправить на оценку
             </button>
           </div>
+
+          {/* Невидимые инпуты для "переснять" */}
+          <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => handleFile(e, 'camera')}
+              className={styles.hiddenInput}
+          />
+          <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFile(e, 'gallery')}
+              className={styles.hiddenInput}
+          />
         </div>
     );
   }
@@ -98,24 +131,47 @@ export function PhotoCapture({ onConfirm, disabled }: Props) {
   return (
       <div className={styles.root}>
         <input
-            ref={fileInputRef}
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
-            onChange={handleFile}
+            onChange={(e) => handleFile(e, 'camera')}
             className={styles.hiddenInput}
         />
-        <button
-            onClick={() => fileInputRef.current?.click()}
-            className={styles.captureBtn}
-            disabled={disabled}
-        >
-          <div className={styles.captureIcon}>📸</div>
-          <div className={styles.captureText}>
-            <div className={styles.captureTitle}>Сфоткать блюдо</div>
-            <div className={styles.captureHint}>Снимай сверху при хорошем свете</div>
-          </div>
-        </button>
+        <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFile(e, 'gallery')}
+            className={styles.hiddenInput}
+        />
+
+        <div className={styles.sourceGrid}>
+          <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className={`${styles.sourceBtn} ${styles.sourceBtnPrimary}`}
+              disabled={disabled}
+          >
+            <div className={styles.sourceIcon}>📸</div>
+            <div className={styles.sourceTitle}>Сфоткать</div>
+            <div className={styles.sourceHint}>Открыть камеру</div>
+          </button>
+
+          <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              className={styles.sourceBtn}
+              disabled={disabled}
+          >
+            <div className={styles.sourceIcon}>🖼</div>
+            <div className={styles.sourceTitle}>Из галереи</div>
+            <div className={styles.sourceHint}>Выбрать готовое фото</div>
+          </button>
+        </div>
+
+        <p className={styles.captionHint}>Снимай сверху при хорошем свете — AI оценит лучше</p>
+
         {error && <div className={styles.errorMsg}>{error}</div>}
       </div>
   );

@@ -8,23 +8,31 @@
   display: none;
 }
 
-// ---- Capture button ----
-.captureBtn {
+// ---- Two source buttons (camera + gallery) ----
+.sourceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.sourceBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-8) var(--space-4);
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-3);
   background: var(--color-surface);
-  border: 2px dashed var(--color-primary);
+  border: 2px dashed var(--color-border);
   border-radius: var(--radius-lg);
   color: var(--color-text);
+  text-align: center;
   transition: all 0.15s;
   cursor: pointer;
+  min-height: 160px;
 
   &:hover {
-    background: var(--color-primary-dim);
+    background: var(--color-surface-2);
     transform: translateY(-2px);
   }
 
@@ -39,24 +47,38 @@
   }
 }
 
-.captureIcon {
-  font-size: 56px;
+// Главная кнопка — камера, акцентная
+.sourceBtnPrimary {
+  border-color: var(--color-primary);
+  background: var(--color-primary-dim);
+
+  &:hover {
+    background: rgba(255, 107, 53, 0.22);
+  }
+}
+
+.sourceIcon {
+  font-size: 44px;
   line-height: 1;
 }
 
-.captureText {
-  text-align: center;
-}
-
-.captureTitle {
-  font-size: 18px;
+.sourceTitle {
+  font-size: 15px;
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
-.captureHint {
+.sourceHint {
+  font-size: 11px;
+  color: var(--color-text-dim);
+  line-height: 1.3;
+}
+
+.captionHint {
+  text-align: center;
   font-size: 13px;
   color: var(--color-text-dim);
+  line-height: 1.4;
+  margin: 0;
 }
 
 // ---- Preview ----
