@@ -51,6 +51,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error('[auth] refreshProfile error:', error);
       return;
     }
+
+    // Проверка блокировки — если заблокирован, force logout
+    if (data && (data as any).is_blocked === true) {
+      const reason = (data as any).block_reason ?? 'Нарушение правил';
+      alert(
+        `Ваш аккаунт заблокирован.\n\nПричина: ${reason}\n\nЕсли считаете это ошибкой — свяжитесь с поддержкой.`
+      );
+      await supabase.auth.signOut();
+      set({ session: null, user: null, profile: null });
+      return;
+    }
+
     set({ profile: data });
   },
 

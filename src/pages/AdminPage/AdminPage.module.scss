@@ -821,3 +821,257 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
 }
+
+.modalList {
+  margin: 0 0 var(--space-2) 0;
+  padding-left: var(--space-4);
+  color: var(--color-text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+// ============================================================
+// Users tab
+// ============================================================
+
+.usersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.userCard {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+
+  &:hover { background: var(--color-surface-2); }
+}
+
+.userCardBlocked {
+  opacity: 0.7;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.userAvatar {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-surface-2);
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.userAvatarPh {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-gold));
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.userBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.userHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.userName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.userSelfBadge {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.userBadges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.userBadgeAdmin {
+  padding: 3px 8px;
+  background: rgba(255, 200, 87, 0.15);
+  color: var(--color-gold);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.userBadgeBlocked {
+  padding: 3px 8px;
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.userMeta {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-dim);
+  flex-wrap: wrap;
+}
+
+.userStats {
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+// ============================================================
+// Dashboard
+// ============================================================
+
+.dashboardTab {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.dashSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dashSectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.dashGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-2);
+}
+
+.statCard {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.15s;
+  border: 1px solid transparent;
+
+  &:hover { transform: translateY(-1px); }
+}
+
+.statCard_green {
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.statCard_orange {
+  border-color: rgba(255, 107, 53, 0.3);
+}
+
+.statCard_red {
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.statCard_blue {
+  border-color: rgba(99, 179, 237, 0.3);
+}
+
+.statIcon {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
+  letter-spacing: -0.3px;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+// Chart
+.chartBox {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  font-size: 12px;
+  color: var(--color-text-dim);
+}
+
+.chartTotal b {
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.chartPeriod {
+  color: var(--color-text-muted);
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dashFooter {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: var(--space-3);
+}
