@@ -33,6 +33,7 @@ export interface Profile {
   dishes_cooked: number;
   avg_ai_score: number | null;
   plan: Plan;
+  is_admin: boolean;
   created_at: string;
 }
 
