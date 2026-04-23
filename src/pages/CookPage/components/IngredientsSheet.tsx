@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Recipe, RecipeIngredient } from '@/types/database';
+import type { Recipe } from '@/types/database';
 import styles from './IngredientsSheet.module.scss';
 
 interface Props {
@@ -111,7 +111,7 @@ export function IngredientsSheet({ recipe, initialServings, open, onClose }: Pro
 
                 {/* Список */}
                 <ul className={styles.list}>
-                    {recipe.ingredients.map((ing: RecipeIngredient, i: number) => (
+                    {recipe.ingredients.map((ing, i) => (
                         <li key={i} className={styles.item}>
                             <span className={styles.itemName}>{ing.name}</span>
                             <span className={styles.itemAmount}>
