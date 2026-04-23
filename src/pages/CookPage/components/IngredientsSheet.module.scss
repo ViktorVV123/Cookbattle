@@ -1,0 +1,186 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background: var(--color-bg);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding: 8px var(--space-5) calc(var(--space-6) + var(--safe-bottom));
+  max-height: 82vh;
+  overflow-y: auto;
+  animation: slideUp 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 640px) {
+  .backdrop {
+    align-items: center;
+  }
+  .sheet {
+    border-radius: 24px;
+    max-width: 480px;
+    max-height: 80vh;
+    animation: slideUpDesktop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+
+  @media (min-width: 640px) {
+    display: none;
+  }
+}
+
+// ============ Header ============
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
+
+  &:hover { background: var(--color-surface-2); }
+  &:active { transform: scale(0.94); }
+}
+
+// ============ Servings row ============
+.servingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.servingsLabel {
+  font-size: 13px;
+  color: var(--color-text-dim);
+  font-weight: 600;
+}
+
+.servingsControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.servingsBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+
+  &:hover:not(:disabled) { background: var(--color-border); }
+  &:active:not(:disabled) { transform: scale(0.94); }
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.servingsValue {
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 84px;
+  text-align: center;
+}
+
+// ============ Ingredients list ============
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemName {
+  font-size: 15px;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+}
+
+.itemAmount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ============ Animations ============
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideUpDesktop {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

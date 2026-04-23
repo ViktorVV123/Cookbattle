@@ -7,6 +7,7 @@ import { submitCookSession, type CookSessionResult } from '@/services/cookSessio
 import { StepTimer } from './components/StepTimer';
 import { PhotoCapture } from './components/PhotoCapture';
 import { ResultModal } from './components/ResultModal';
+import { IngredientsSheet } from './components/IngredientsSheet';
 import styles from './CookPage.module.scss';
 import {useRecipe} from "@/hooks/useRecipes.ts";
 
@@ -26,17 +27,23 @@ export function CookPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Ингредиенты-шит
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
+
   // Сброс при смене рецепта
   useEffect(() => {
     setStepIdx(0);
     setPhase('cooking');
     setResult(null);
     setError(null);
+    setIngredientsOpen(false);
   }, [id]);
 
   // Свайпы на мобиле (влево/вправо между шагами)
   useEffect(() => {
     if (phase !== 'cooking') return;
+    // Пока шит открыт — не перехватываем свайпы, чтобы не мешать скроллу списка
+    if (ingredientsOpen) return;
 
     let startX = 0;
     const onTouchStart = (e: TouchEvent) => { startX = e.touches[0].clientX; };
@@ -53,7 +60,7 @@ export function CookPage() {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [phase, stepIdx, recipe]);
+  }, [phase, stepIdx, recipe, ingredientsOpen]);
 
   if (isLoading) {
     return <div className={styles.loading}><div className={styles.spinner} /></div>;
@@ -95,9 +102,7 @@ export function CookPage() {
 
       setResult(res);
       setPhase('done');
-      // Обновляем профиль чтобы XP/streak в ленте обновились
       await refreshProfile();
-      // И инвалидируем кэш ленты рецептов — cooked_count у рецепта обновился
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
     } catch (e: any) {
       setPhase('photo');
@@ -113,9 +118,9 @@ export function CookPage() {
   if (phase === 'cooking') {
     return (
         <div className={styles.root}>
-          {/* Header с прогрессом */}
+          {/* Header с прогрессом + кнопка ингредиентов */}
           <header className={styles.header}>
-            <button onClick={() => navigate(-1)} className={styles.closeBtn}>
+            <button onClick={() => navigate(-1)} className={styles.closeBtn} aria-label="Закрыть">
               ✕
             </button>
             <div className={styles.headerCenter}>
@@ -124,7 +129,14 @@ export function CookPage() {
                 Шаг {stepIdx + 1} из {steps.length}
               </div>
             </div>
-            <div className={styles.headerSpacer} />
+            <button
+                type="button"
+                onClick={() => setIngredientsOpen(true)}
+                className={styles.ingredientsBtn}
+                aria-label="Ингредиенты"
+            >
+              📋
+            </button>
           </header>
 
           <div className={styles.progressBar}>
@@ -135,8 +147,6 @@ export function CookPage() {
           <main className={styles.stepContent}>
             <div className={styles.stepNumber}>{currentStep.order ?? stepIdx + 1}</div>
 
-            {/* Картинка шага — есть только у некоторых UGC-рецептов.
-              Показываем до текста, чтобы сначала юзер видел что должно получиться. */}
             {currentStep.image_url && (
                 <div className={styles.stepImageWrap}>
                   <img
@@ -178,6 +188,13 @@ export function CookPage() {
                 </button>
             )}
           </footer>
+
+          {/* Шит со списком ингредиентов */}
+          <IngredientsSheet
+              recipe={recipe}
+              open={ingredientsOpen}
+              onClose={() => setIngredientsOpen(false)}
+          />
         </div>
     );
   }

@@ -334,3 +334,20 @@
   object-fit: cover;
   display: block;
 }
+.ingredientsBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 18px;
+  border-radius: 50%;
+  transition: background 0.15s, transform 0.1s;
+  cursor: pointer;
+
+  &:hover { background: var(--color-surface-2); }
+  &:active { transform: scale(0.94); }
+}
+
